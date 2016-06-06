@@ -5,6 +5,7 @@ import requests
 import os
 import json
 
+#Función que obtiene el título de las noticias
 def getTitulo(url):
     req = requests.get(url)
     statusCode = req.status_code
@@ -13,9 +14,13 @@ def getTitulo(url):
         html = BeautifulSoup(req.text, 'html.parser')
         titulo = html.find('h1',{'class':'tit_arti_1 fftit3 c3b'})
 
+        if (titulo == None):
+            #La noticia puede ser un análisis
+            titulo = html.find('p', {'class':'tit_arti_2 fftit'})
+
         if(titulo != None):
             #Texto
-            titulo = titulo.getText()        
+            titulo = titulo.getText()
 
         else:
             #Video
@@ -23,8 +28,9 @@ def getTitulo(url):
 
     return titulo
 
-def extraerDatos():  
-    mensaje = {}  
+#Función que extrae la imagen y el título de las noticias.
+def extraerDatos():
+    mensaje = {}
     url = "http://www.3djuegos.com/"
     req = requests.get(url)
     statusCode = req.status_code
@@ -34,32 +40,34 @@ def extraerDatos():
         entradas = html.find_all('div',{'id':'zona_chapas_gfx'})
         referencia = entradas[0].find_all('div')
         imagen = entradas[0].find_all('img')
-            
+
         for i in [0,1,2]:
             ref = format(referencia[i]['data-url'])
             img = format(imagen[i]['src'])
             titulo = getTitulo(ref)
             mensaje[i]=({'titulo': titulo, 'imagen':img,'referencia':ref})
-    
+
     return mensaje
 
-
-def extraerContenido(url):  
-    mensaje = {}  
+#Función que extrae el contenido de las noticias.
+def extraerContenido(url):
+    mensaje = {}
     req = requests.get(url)
     statusCode = req.status_code
-
 
     if statusCode == 200:
         html = BeautifulSoup(req.text, 'html.parser')
         titulo = html.find('h1',{'class':'tit_arti_1 fftit3 c3b'})
-        texto = html.find('p',{'class':'s16 b fftext c2 lh27'}) 
+        texto = html.find('p',{'class':'s16 b fftext c2 lh27'})
         video = html.find('meta',{'itemprop':'contentURL'})
+        
+        if (titulo == None):
+            titulo = html.find('p', {'class':'tit_arti_2 fftit'})
 
         if(titulo != None):
             #Texto
             titulo = titulo.getText()
-            texto = texto.getText()            
+            texto = texto.getText()
 
         else:
             #Video
